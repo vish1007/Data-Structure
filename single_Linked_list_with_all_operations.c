@@ -201,7 +201,7 @@ int main()
     struct node *head=NULL;
     head=create();
     display(head);
-    head=delete_at_first(head);
+    head=atanypos(head,3);
     display(head);
     return 0;
 }
