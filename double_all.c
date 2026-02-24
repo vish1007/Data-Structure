@@ -194,14 +194,12 @@ struct node* reverse(struct node *head)
 
     if (head == NULL) // here we are checking list ie empty or not to check edge case
         return NULL;
-
     while (current != NULL)
     {
         //Swaping next and prev
         temp = current->prev;
         current->prev = current->next;
         current->next = temp;
-
         //Move to next node (which is previous now)
         current = current->prev;
     }
@@ -217,26 +215,7 @@ int main() {
     // Function Call
     head = createList();
     display_forward(head);
-
-    // head=insert_begin(head);
-    // display_forward(head);
-
-    // head=insert_end(head);
-    // display_forward(head);
-
-    // head=insert_at_position(head);
-    // display_forward(head);
-    
-    // head=delete_first(head);
-    // display_forward(head);
-
-    // head=delete_last(head);
-    // display_forward(head);
-
-    // head=delete_at_position(head);
-    // display_forward(head);
-  
-    // head=reverse(head);
-    // display_forward(head);
+    head=reverse(head);
+    display_forward(head);
     return 0;
 }
