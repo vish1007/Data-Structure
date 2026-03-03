@@ -14,14 +14,11 @@ else
 {
 top++;
 stack[top]=ch;
+
 }
 }
 char pop()
-{   if(top==-1)
-    {
-    printf("Invalid expression and stack is empty\n");
-    return 0;
-    }
+{
     char ch;
     ch=stack[top];
     top--;
@@ -79,6 +76,7 @@ int main()
     if(top==-1)
     {
         printf("valid_Expression\n");
+
     }
     else
     {
