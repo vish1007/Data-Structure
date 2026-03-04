@@ -2,18 +2,37 @@
 #include<string.h>
 #include<ctype.h>
 
-#define MAX 100
+#define max 10   // Maximum size of stack
 
-char stack[MAX];
+// Stack array to store operators
+char stack[max];
+
+// 'top' keeps track of the top element of stack
 int top = -1;
 
+// -------------------- PUSH FUNCTION --------------------
+// This function pushes an element into the stack
 void push(char ch)
 {
-    stack[++top] = ch;
+    // Check if stack is full
+    if (top == max - 1)
+    {
+        printf("Stack is full\n");
+    }
+    else
+    {
+        top++;              // Move top to next position
+        stack[top] = ch;    // Insert element at top
+    }
 }
+// -------------------- POP FUNCTION --------------------
+// This function removes and returns the top element
 char pop()
 {
-    return stack[top--];
+    char ch;
+    ch = stack[top];   // Store the top element
+    top--;             // Decrease top (remove element)
+    return ch;         // Return popped element
 }
 
 int precedence(char ch)
@@ -54,7 +73,8 @@ int main()
     {
         if(isalnum(infix[i]))
         {
-            prefix[j++] = infix[i];
+            prefix[j] = infix[i];
+            j++;
         }
 
         else if(infix[i] == ')')
@@ -66,7 +86,8 @@ int main()
         {
             while(stack[top] != ')')
             {
-                prefix[j++] = pop();
+                prefix[j] = pop();
+                j++;
             }
             pop();
         }
@@ -75,15 +96,16 @@ int main()
         {
             while(top != -1 && precedence(stack[top]) > precedence(infix[i]))
             {
-                prefix[j++] = pop();
+                prefix[j] = pop();
+                j++;
             }
             push(infix[i]);
         }
     }
-
     while(top != -1)
     {
-        prefix[j++] = pop();
+        prefix[j] = pop();
+        j++;
     }
 
     prefix[j] = '\0';
