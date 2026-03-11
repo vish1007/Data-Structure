@@ -94,7 +94,7 @@ int main()
 
         else
         {
-            while(top != -1 && precedence(stack[top]) > precedence(infix[i]))
+            while(top != -1 && precedence(stack[top]) >= precedence(infix[i]))
             {
                 prefix[j] = pop();
                 j++;
