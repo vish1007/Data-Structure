@@ -5,6 +5,7 @@ struct node{
     int data;
     struct node *next;
 };
+struct node *head=NULL;
 
 
 //************************************How to create a single link list-automatic process********************************************
@@ -198,11 +199,11 @@ struct node *reverse_list(struct node *head)
 //************Here we are calling the function which ever we require in the main function***************** */
 int main()
 {
-    struct node *head=NULL;
-    head=create();
-    display(head);
-    head=insertfirst(head);
-    display(head);
+    struct node *p=NULL;
+    p=create();
+    display(p);
+    p=insertfirst(p);
+    display(p);
     
     return 0;
 }
