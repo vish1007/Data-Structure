@@ -1,7 +1,7 @@
 #include <stdio.h>
 int main()
 {
-    int a[7] = {7,4,5,9,8,2,1};
+    int a[7] = {7,4,5,9,8};
     int i, j, min, temp;
     int n = 7;
     for(i = 0; i < n-1; i++)   // passes
