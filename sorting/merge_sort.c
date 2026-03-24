@@ -49,13 +49,10 @@ void mergeSort(int a[], int left, int right)
     if(left < right)
     {
         int mid = (left + right) / 2;
-
         // Divide left part
         mergeSort(a, left, mid);
-
         // Divide right part
         mergeSort(a, mid + 1, right);
-
         // Merge both parts
         merge(a, left, mid, right);
     }

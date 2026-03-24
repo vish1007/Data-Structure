@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Selection Sort Visualizer</title>
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            padding: 20px;
+        }
+
+        .code-container {
+            width: 40%;
+            background: #1e1e1e;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .line { padding: 5px; }
+        .active { background: #444; }
+
+        .variable-box {
+            margin-top: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 10px;
+            color: black;
+        }
+
+        .visual-container {
+            width: 60%;
+            text-align: center;
+        }
+
+        .array, .indices, .arrows {
+            display: flex;
+            justify-content: center;
+        }
+
+        .box, .index, .arrow {
+            width: 60px;
+            margin: 5px;
+            text-align: center;
+        }
+
+        .box {
+            height: 60px;
+            line-height: 60px;
+            border: 2px solid black;
+            transition: transform 0.5s ease; /* 🔥 animation */
+        }
+
+        .arrow { height: 35px; font-weight: bold; }
+
+        .i { background: lightblue; }
+        .j { background: orange; }
+        .min { background: lightgreen; }
+
+        .arrow-i { color: blue; }
+        .arrow-j { color: orange; }
+        .arrow-min { color: green; }
+
+        .info {
+            white-space: pre-line;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        input {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="code-container">
+
+    <input id="userInput" placeholder="Enter array e.g. 7,4,5,9,8">
+    <button onclick="startVisualizer()">Start</button>
+
+    <div class="line" id="l1">for(i = 0; i &lt; n-1; i++)</div>
+    <div class="line" id="l2">{</div>
+    <div class="line" id="l3">   min = i;</div>
+    <div class="line" id="l4">   for(j = i+1; j &lt; n; j++)</div>
+    <div class="line" id="l5">   {</div>
+    <div class="line" id="l6">      if(a[j] &lt; a[min])</div>
+    <div class="line" id="l7">         min = j;</div>
+    <div class="line" id="l8">   }</div>
+    <div class="line" id="l9">   swap(a[i], a[min]);</div>
+    <div class="line" id="l10">}</div>
+
+    <div class="variable-box">
+        <h3>Variables</h3>
+        <div id="varI">i = 0</div>
+        <div id="varJ">j = 0</div>
+        <div id="varMin">min = 0</div>
+    </div>
+
+</div>
+
+<div class="visual-container">
+
+<h2 id="passTitle"></h2>
+
+<div class="arrows" id="arrows"></div>
+<div class="array" id="array"></div>
+<div class="indices" id="indices"></div>
+
+<div class="info" id="stepInfo"></div>
+
+<button onclick="prevStep()">⬅ Back</button>
+<button onclick="nextStep()">Next ➡</button>
+
+</div>
+
+<script>
+
+let arr = [];
+let i=0, j=0, min=0;
+let phase="for_i";
+
+let history=[], stepIndex=-1;
+
+let showI=true, showJ=false, showMin=false;
+
+function startVisualizer(){
+
+    let input = document.getElementById("userInput").value;
+
+    if(!input){
+        alert("Please enter array values");
+        return;
+    }
+
+    arr = input.split(",").map(x => Number(x.trim()));
+
+    i=0; j=0; min=0;
+    phase="for_i";
+    history=[]; stepIndex=-1;
+
+    showI=true; showJ=false; showMin=false;
+
+    saveState("Start\nClick Next","l1",{i:true});
+    render("Start\nClick Next","l1");
+}
+
+function highlight(lineId){
+    document.querySelectorAll(".line").forEach(l=>l.classList.remove("active"));
+    if(lineId) document.getElementById(lineId).classList.add("active");
+}
+
+function saveState(message,line,pointers){
+    history.push({
+        arr:[...arr], i,j,min,phase,message,line,
+        showI: pointers?.i ?? false,
+        showJ: pointers?.j ?? false,
+        showMin: pointers?.min ?? false
+    });
+    stepIndex++;
+}
+
+function loadState(s){
+    arr=[...s.arr];
+    i=s.i; j=s.j; min=s.min; phase=s.phase;
+
+    showI=s.showI;
+    showJ=s.showJ;
+    showMin=s.showMin;
+
+    render(s.message,s.line);
+}
+
+function render(message="", line=null){
+
+    document.getElementById("varI").innerText="i = "+i;
+    document.getElementById("varJ").innerText="j = "+j;
+    document.getElementById("varMin").innerText="min = "+min;
+
+    let a=document.getElementById("array");
+    let idx=document.getElementById("indices");
+    let ar=document.getElementById("arrows");
+
+    a.innerHTML=""; idx.innerHTML=""; ar.innerHTML="";
+
+    for(let k=0;k<arr.length;k++){
+
+        let arrow=document.createElement("div");
+        arrow.className="arrow";
+
+        if(showI && k===i) arrow.innerHTML+="<div class='arrow-i'>↓ i</div>";
+        if(showJ && k===j) arrow.innerHTML+="<div class='arrow-j'>↓ j</div>";
+        if(showMin && k===min) arrow.innerHTML+="<div class='arrow-min'>↓ min</div>";
+
+        ar.appendChild(arrow);
+
+        let box=document.createElement("div");
+        box.className="box";
+        box.innerText=arr[k];
+
+        if(showI && k===i) box.classList.add("i");
+        if(showJ && k===j) box.classList.add("j");
+        if(showMin && k===min) box.classList.add("min");
+
+        a.appendChild(box);
+
+        let idd=document.createElement("div");
+        idd.className="index";
+        idd.innerText=k;
+        idx.appendChild(idd);
+    }
+
+    document.getElementById("passTitle").innerText="Pass "+(i+1);
+    document.getElementById("stepInfo").innerText=message;
+
+    highlight(line);
+}
+
+// 🔥 ANIMATION FUNCTION
+function animateSwap(i, min, callback){
+
+    let boxes = document.querySelectorAll(".box");
+
+    let box1 = boxes[i];
+    let box2 = boxes[min];
+
+    let distance = (min - i) * 70;
+
+    box1.style.transform = `translateX(${distance}px)`;
+    box2.style.transform = `translateX(${-distance}px)`;
+
+    setTimeout(() => {
+        box1.style.transform = "";
+        box2.style.transform = "";
+        callback();
+    }, 500);
+}
+
+function nextStep(){
+
+    if(stepIndex < history.length-1){
+        stepIndex++;
+        loadState(history[stepIndex]);
+        return;
+    }
+
+    if(i>=arr.length-1){
+        render("✅ Sorting Completed!");
+        return;
+    }
+
+    let msg="", line="";
+    let pointers={i:false,j:false,min:false};
+
+    if(phase==="for_i"){
+        msg=`for loop (i)\ni = ${i}`;
+        line="l1";
+        pointers={i:true};
+        phase="set_min";
+    }
+
+    else if(phase==="set_min"){
+        min=i;
+        msg=`min = i → ${min}`;
+        line="l3";
+        pointers={i:true,min:true};
+        phase="for_j";
+    }
+
+    else if(phase==="for_j"){
+        j=i+1;
+        msg=`Initialize j\nj = ${j}`;
+        line="l4";
+        pointers={i:true,j:true,min:true};
+        phase="check_j";
+    }
+
+    else if(phase==="check_j"){
+        if(j < arr.length){
+            msg=`Check j < n\n${j} < ${arr.length} ✔`;
+            line="l4";
+            pointers={i:true,j:true,min:true};
+            phase="compare";
+        } else {
+            msg=`Check j < n\n${j} < ${arr.length} ✖`;
+            line="l4";
+            pointers={i:true,j:true,min:true};
+            phase="swap";
+        }
+    }
+
+    else if(phase==="compare"){
+        msg=`Check:\na[${j}] < a[${min}]\n${arr[j]} < ${arr[min]}`;
+        line="l6";
+        pointers={i:true,j:true,min:true};
+        phase="if_result";
+    }
+
+    else if(phase==="if_result"){
+        if(arr[j] < arr[min]){
+            msg=`✔ True\nmin = ${j}`;
+            min=j;
+            line="l7";
+        } else {
+            msg=`✖ False\nmin unchanged`;
+            line="l6";
+        }
+        pointers={i:true,j:true,min:true};
+        phase="increment_j";
+    }
+
+    else if(phase==="increment_j"){
+        j++;
+        msg=`j++ → ${j}`;
+        line="l4";
+        pointers={i:true,j:true,min:true};
+        phase="check_j";
+    }
+
+    // 🔥 ANIMATED SWAP
+    else if(phase==="swap"){
+        msg=`Swap:\na[${i}] ↔ a[${min}]`;
+        line="l9";
+        pointers={i:true,min:true};
+
+        animateSwap(i, min, () => {
+
+            let temp = arr[i];
+            arr[i] = arr[min];
+            arr[min] = temp;
+
+            msg+=`\nArray: [${arr.join(", ")}]`;
+
+            showI = pointers.i ?? false;
+            showJ = pointers.j ?? false;
+            showMin = pointers.min ?? false;
+
+            saveState(msg,line,pointers);
+            render(msg,line);
+
+            phase="increment_i";
+        });
+
+        return;
+    }
+
+    else if(phase==="increment_i"){
+        i++;
+        msg=`i++ → ${i}`;
+        line="l1";
+        pointers={i:true};
+        phase="for_i";
+    }
+
+    showI = pointers.i ?? false;
+    showJ = pointers.j ?? false;
+    showMin = pointers.min ?? false;
+
+    saveState(msg,line,pointers);
+    render(msg,line);
+}
+
+function prevStep(){
+    if(stepIndex>0){
+        stepIndex--;
+        loadState(history[stepIndex]);
+    }
+}
+
+</script>
+
+</body>
+</html>
