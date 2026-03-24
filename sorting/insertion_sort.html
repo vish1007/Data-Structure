@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Insertion Sort Visualizer</title>
+
+<style>
+body {
+    font-family: Arial;
+    display: flex;
+    padding: 20px;
+}
+
+.code-container {
+    width: 40%;
+    background: #1e1e1e;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.line { padding: 5px; }
+.active { background: #444; }
+
+.visual-container {
+    width: 60%;
+    text-align: center;
+}
+
+.array, .arrows, .indices {
+    display: flex;
+    justify-content: center;
+}
+
+.box, .arrow, .index {
+    width: 60px;
+    margin: 5px;
+    text-align: center;
+}
+
+.box {
+    height: 60px;
+    line-height: 60px;
+    border: 2px solid black;
+}
+
+.i { background: lightblue; }
+.j { background: orange; }
+
+.index {
+    font-weight: bold;
+}
+
+#keyBox {
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.variable-box {
+    margin-top: 20px;
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 10px;
+    color: black;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+input {
+    width: 80%;
+    padding: 8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- LEFT SIDE -->
+<div class="code-container">
+
+<input id="inputArray" placeholder="23,1,10,5,2">
+<button onclick="start()">Start</button>
+
+<div class="line" id="l1">for(i = 1; i &lt; n; i++)</div>
+<div class="line" id="l2">key = a[i];</div>
+<div class="line" id="l3">j = i - 1;</div>
+<div class="line" id="l4">while(j &gt;= 0 &amp;&amp; a[j] &gt; key)</div>
+<div class="line" id="l5">a[j+1] = a[j];</div>
+<div class="line" id="l6">j = j - 1;</div>
+<div class="line" id="l7">a[j+1] = key;</div>
+
+<div class="variable-box">
+    <h3>Variables</h3>
+    <div id="vars"></div>
+</div>
+
+</div>
+
+<!-- RIGHT SIDE -->
+<div class="visual-container">
+
+<div id="keyBox"></div>
+
+<div class="arrows" id="arrows"></div>
+<div class="array" id="array"></div>
+<div class="indices" id="indices"></div>
+
+<div id="info"></div>
+
+<button onclick="nextStep()">Next</button>
+<button onclick="prevStep()">Back</button>
+
+</div>
+
+<script>
+
+let arr=[], i=1, j=0, key=0;
+let phase="for_i";
+
+let history=[], stepIndex=-1;
+
+let showI=false, showJ=false, showKey=false;
+
+function highlight(line){
+    document.querySelectorAll(".line").forEach(l=>l.classList.remove("active"));
+    if(line) document.getElementById(line).classList.add("active");
+}
+
+function start(){
+    arr=document.getElementById("inputArray").value.split(",").map(Number);
+
+    i=1; j=0; key=0;
+    phase="for_i";
+    history=[]; stepIndex=-1;
+
+    saveState("Start","l1",{i:true});
+    render("Start","l1");
+}
+
+function saveState(msg,line,p){
+    history.push({
+        arr:[...arr], i,j,key,phase,msg,line,
+        showI:p.i||false,
+        showJ:p.j||false,
+        showKey:p.key||false
+    });
+    stepIndex++;
+}
+
+function loadState(s){
+    arr=[...s.arr];
+    i=s.i; j=s.j; key=s.key; phase=s.phase;
+
+    showI=s.showI;
+    showJ=s.showJ;
+    showKey=s.showKey;
+
+    render(s.msg,s.line);
+}
+
+function render(msg,line){
+
+    // VARIABLES
+    document.getElementById("vars").innerText =
+        `i = ${i}\n j = ${j}\n key = ${key}`;
+
+    // KEY DISPLAY
+    document.getElementById("keyBox").innerText =
+        showKey ? "Key = " + key : "";
+
+    document.getElementById("info").innerText = msg;
+
+    let arrDiv=document.getElementById("array");
+    let arrowDiv=document.getElementById("arrows");
+    let idxDiv=document.getElementById("indices");
+
+    arrDiv.innerHTML="";
+    arrowDiv.innerHTML="";
+    idxDiv.innerHTML="";
+
+    arr.forEach((v,idx)=>{
+
+        // ARROWS
+        let arrow=document.createElement("div");
+        arrow.className="arrow";
+
+        if(showI && idx===i)
+            arrow.innerHTML+="<div style='color:blue'>↓i</div>";
+
+        if(showJ && j>=0 && idx===j)
+            arrow.innerHTML+="<div style='color:orange'>↓j</div>";
+
+        arrowDiv.appendChild(arrow);
+
+        // ARRAY BOX
+        let box=document.createElement("div");
+        box.className="box";
+        box.innerText=v;
+
+        if(showI && idx===i) box.classList.add("i");
+        if(showJ && j>=0 && idx===j) box.classList.add("j");
+
+        arrDiv.appendChild(box);
+
+        // INDEX
+        let indexBox=document.createElement("div");
+        indexBox.className="index";
+        indexBox.innerText=idx;
+
+        idxDiv.appendChild(indexBox);
+    });
+
+    highlight(line);
+}
+
+function nextStep(){
+
+    if(stepIndex < history.length-1){
+        stepIndex++;
+        loadState(history[stepIndex]);
+        return;
+    }
+
+    if(i>=arr.length){
+        render("Sorted");
+        return;
+    }
+
+    let msg="", line="", p={};
+
+    if(phase==="for_i"){
+        msg=`Start Pass: i = ${i}`;
+        line="l1";
+        p={i:true};
+        phase="set_key";
+    }
+
+    else if(phase==="set_key"){
+        key=arr[i];
+        msg=`key = a[${i}] = ${key}`;
+        line="l2";
+        p={i:true,key:true};
+        phase="set_j";
+    }
+
+    else if(phase==="set_j"){
+        j=i-1;
+        msg=`j = ${j}`;
+        line="l3";
+        p={i:true,j:true,key:true};
+        phase="while";
+    }
+
+    else if(phase==="while"){
+        if(j>=0 && arr[j]>key){
+            msg=`Check:\na[${j}] > key\n${arr[j]} > ${key} ✔`;
+            line="l4";
+            p={i:true,j:true,key:true};
+            phase="shift";
+        } else {
+            msg=`Condition false → insert key`;
+            phase="insert";
+            return nextStep();
+        }
+    }
+
+    else if(phase==="shift"){
+        arr[j+1]=arr[j];
+        msg=`Move ${arr[j]} to position ${j+1}`;
+        line="l5";
+        p={i:true,j:true,key:true};
+        phase="dec_j";
+    }
+
+    else if(phase==="dec_j"){
+        j--;
+        msg=`j-- → ${j}`;
+        line="l6";
+        p={i:true,j:true,key:true};
+        phase="while";
+    }
+
+    else if(phase==="insert"){
+        arr[j+1]=key;
+        msg=`Insert key ${key} at position ${j+1}`;
+        line="l7";
+        p={i:true,key:true};
+        phase="inc_i";
+    }
+
+    else if(phase==="inc_i"){
+        i++;
+        msg=`i++ → ${i}`;
+        line="l1";
+        p={i:true};
+        phase="for_i";
+    }
+
+    showI=p.i||false;
+    showJ=p.j||false;
+    showKey=p.key||false;
+
+    saveState(msg,line,p);
+    render(msg,line);
+}
+
+function prevStep(){
+    if(stepIndex>0){
+        stepIndex--;
+        loadState(history[stepIndex]);
+    }
+}
+
+</script>
+
+</body>
+</html>
